@@ -1,0 +1,33 @@
+name: Bulk operation to download a list of users, groups or devices
+description: |
+  'Identifies which user has downloaded a list of all the users, groups or devices in a tenant.'
+severity: Informational
+requiredDataConnectors:
+  - connectorId: AzureActiveDirectory
+    dataTypes:
+      - AuditLogs
+queryFrequency: 7d
+queryPeriod: 7d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Discovery
+relevantTechniques:
+  - T1069
+  - T1087
+  - T1120
+tags:
+  - 
+query: |
+let auditLookback = 7d;
+let opName = dynamic(["Download users - started (bulk)", "Download groups - started (bulk)", "Download devices - started (bulk)"]);
+AuditLogs
+| where TimeGenerated >= ago(auditLookback)
+| where OperationName in~ (opName)
+| where Result == 'success'
+| extend IniatingUser = tostring(parse_json(tostring(InitiatedBy.user)).userPrincipalName)
+| extend FileName3 = tostring(split(ResultDescription, ":", 1)[0])
+| extend FileName2 = tostring(split(FileName3, "Activity type")[0])
+| extend FileName = tostring(split(FileName2, ".")[0])
+| project TimeGenerated, IniatingUser, OperationName, FileName
+| sort by TimeGenerated desc
