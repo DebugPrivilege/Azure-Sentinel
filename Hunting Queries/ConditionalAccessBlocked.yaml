@@ -1,4 +1,4 @@
-name: Access has been denied to a user due to Conditional Access policies
+name: Access has been denied to a user due to Conditional Access
 description: |
   'This query identifies when a user has been blocked more than 5 times by Conditional Access Policies in the last 12 hours.
   Default Failure count is 5 and default Time Window is 12 hours.'
