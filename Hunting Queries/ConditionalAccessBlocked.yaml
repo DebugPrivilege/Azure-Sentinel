@@ -5,7 +5,7 @@ severity: Medium
 requiredDataConnectors:
   - connectorId: AzureActiveDirectory
     dataTypes:
-      - AuditLogs
+      - SigninLogs
 tactics:
   - Initial Access
 relevantTechniques:
