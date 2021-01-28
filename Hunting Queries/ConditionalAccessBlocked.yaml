@@ -1,1 +1,32 @@
-
+name: Access has been denied to a user due to Conditional Access policies
+description: |
+  'This query identifies when a user has been blocked more than 5 times by Conditional Access Policies in the last 12 hours.'
+severity: Medium
+requiredDataConnectors:
+  - connectorId: AzureActiveDirectory
+    dataTypes:
+      - AuditLogs
+tactics:
+  - Initial Access
+relevantTechniques:
+  - T1078
+tags:
+  -
+query: |
+let failureCountThreshold = 5;
+let timeRange = 1d;
+let authenticationWindow = 12h;
+SigninLogs
+| where TimeGenerated >= ago(timeRange)
+| extend OS = DeviceDetail.operatingSystem, Browser = DeviceDetail.browser
+| extend StatusCode = tostring(Status.errorCode), StatusDetails = tostring(Status.additionalDetails)
+| extend State = tostring(LocationDetails.state), City = tostring(LocationDetails.city)
+| extend FailedLogons = iff(ResultType in ("53003"), "Failure", "Logons")
+| summarize StartTimeUtc = min(TimeGenerated), EndTimeUtc = max(TimeGenerated), IPAddress = makeset(IPAddress), makeset(OS), makeset(Browser), makeset(City), 
+    makeset(ResultType), FailureCount = countif(FailedLogons == "Failure")
+    by bin(TimeGenerated, authenticationWindow), UserDisplayName, UserPrincipalName, AppDisplayName, ResultDescription
+| where FailureCount >= failureCountThreshold
+| mvexpand IPAddress
+| extend IPAddress = tostring(IPAddress)
+| extend timestamp = StartTimeUtc, AccountCustomEntity = UserPrincipalName, IPCustomEntity = IPAddress
+| sort by TimeGenerated desc
