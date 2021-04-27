@@ -30,7 +30,7 @@ let opName = dynamic(["Add delegated permission grant", "Add app role assignment
   | extend UserIPAddress = tostring(parse_json(tostring(InitiatedBy.user)).ipAddress)
   | extend DisplayName = tostring(props.displayName)
   | extend Permissions = tostring(parse_json(tostring(props.newValue)))
-  | where Permissions has_any ("Directory.AccessAsUser.All", "Directory.ReadWrite.All", "Group.ReadWrite.All", "Application.ReadWrite.All", "Application.ReadWrite.Own", "Device.ReadWrite.All", "Domain.ReadWrite.All", "Member.Read.Hidden", "Policy.Read.All")
+  | where Permissions has_any ("Directory.AccessAsUser.All", "Directory.ReadWrite.All", "Group.ReadWrite.All", "Application.ReadWrite.All", "Application.ReadWrite.Own", "Device.ReadWrite.All", "Domain.ReadWrite.All", "Member.Read.Hidden")
   | extend PermissionsAddedTo = tostring(TargetResources[0].displayName)
   | extend Type = tostring(TargetResources[0].type)
   | project-away props
