@@ -12,7 +12,7 @@ relevantTechniques:
   - T1087
 query: |
 let starttime = 180d;
-let endtime = 1d;
+let endtime = 2d;
 let countThreshold = 0;
 AADServicePrincipalSignInLogs
 | where TimeGenerated >= ago(endtime)
@@ -27,4 +27,4 @@ AADServicePrincipalSignInLogs
  ) 
 on locationString
 | where distinctSPNCount > countThreshold
-| project-reorder StartTime, EndTime, SpnList, locationString, IPAddress, distinctSPNCount
+| project-reorder StartTime, EndTime, SpnList, locationString, IPAddress, distinctSPNCountt
