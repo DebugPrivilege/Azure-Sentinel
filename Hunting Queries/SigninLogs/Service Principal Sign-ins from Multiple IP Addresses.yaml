@@ -1,0 +1,31 @@
+name: Service Principal Sign-ins from Multiple IP Addresses
+description: |
+'This query looks for Service Principals sign-ins from multiple IP Addresses'
+requiredDataConnectors:
+  - connectorId: AzureActiveDirectory
+    dataTypes:
+      - SigninLogs
+      - AADServicePrincipalSignInLogs
+tactics:
+  - InitialAccess
+relevantTechniques:
+  - T1110
+query: |
+  let timeframe = 180d;
+  let aadFunc = (tableName:string){
+  table(tableName)
+  | where ResultType == 0
+  | summarize CountOfIPAddress = dcount(IPAddress), IPAddress = make_set(IPAddress), StartTime = min(TimeGenerated), EndTime = max(TimeGenerated) by ServicePrincipalName, Type
+  | where StartTime >= ago(timeframe)
+  | where isnotempty(ServicePrincipalName)
+  | where CountOfIPAddress > 1
+  | extend Timestamp = StartTime, AccountCustomEntity = ServicePrincipalName
+  };
+  let aadSignin = aadFunc("SigninLogs");
+  let aadSpnInt = aadFunc("AADServicePrincipalSignInLogs");
+  union isfuzzy=true aadSignin, aadSpnInt
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: FullName
+        columnName: AccountCustomEntity
