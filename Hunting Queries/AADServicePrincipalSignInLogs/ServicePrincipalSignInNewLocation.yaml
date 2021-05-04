@@ -29,4 +29,5 @@ on locationString
 | where distinctSPNCount > countThreshold
 | project-reorder StartTime, EndTime, SpnList, locationString, IPAddress, distinctSPNCount
 
-comment: When you don't receive any results. Try to change the let endtime = 2d; to a different value.
+note: | 
+'When you don't receive any results. Try to change the let endtime = 2d; to a different value.'
